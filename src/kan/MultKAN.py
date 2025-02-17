@@ -1305,7 +1305,9 @@ class MultKAN(nn.Module):
         if title != None:
             plt.gcf().get_axes()[0].text(0.5, (y0+z0) * (len(self.width) - 1) + 0.3, title, fontsize=40 * scale, horizontalalignment='center', verticalalignment='center')
 
-            
+        plt.savefig(f'{folder}/whole_model.png', bbox_inches="tight", dpi=600)
+        plt.close()
+
     def reg(self, reg_metric, lamb_l1, lamb_entropy, lamb_coef, lamb_coefdiff):
         '''
         Get regularization
