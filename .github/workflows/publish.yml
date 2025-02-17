@@ -24,6 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools wheel poetry
 
+      - name: Add Poetry to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Check Poetry Installation
         run: poetry --version
 
