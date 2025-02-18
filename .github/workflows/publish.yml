@@ -33,12 +33,12 @@ jobs:
           NEW_VERSION=$(poetry version --short)
           echo "New version: $NEW_VERSION"
           # Commit & push the updated version
-          git checkout main
+          git checkout master
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add pyproject.toml
           git commit -m "Bump version to $NEW_VERSION [skip ci]"
-          git push origin main
+          git push origin master
         
       - name: Build package
         run: |
