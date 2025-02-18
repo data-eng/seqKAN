@@ -28,6 +28,8 @@ jobs:
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Automatically Bump Patch Version
+        env:
+          ORG_GH_PAT: ${{ secrets.ORG_GH_PAT }}
         run: |
           poetry version patch  # Increments the patch version
           NEW_VERSION=$(poetry version --short)
