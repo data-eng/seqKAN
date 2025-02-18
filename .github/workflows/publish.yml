@@ -27,31 +27,6 @@ jobs:
       - name: Add Poetry to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Automatically Bump Patch Version
-        env:
-          ORG_GH_PAT: ${{ secrets.ORG_GH_PAT }}
-        run: |
-          poetry version patch  # Increments the patch version
-          NEW_VERSION=$(poetry version --short)
-          echo "New version: $NEW_VERSION"
-          
-          # Configure Git
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-          
-          # Remove the default origin and re-add it using the PAT
-          git remote remove origin
-          git remote add origin https://x-access-token:${ORG_GH_PAT}@github.com/data-eng/seqKAN.git
-      
-          # Fetch all branches and switch to 'master'
-          git fetch --prune
-          git checkout master
-      
-          # Commit & push the updated version
-          git add pyproject.toml
-          git commit -m "Bump version to $NEW_VERSION [skip ci]"
-          git push origin master
-        
       - name: Build package
         run: |
           python3 -m poetry build
