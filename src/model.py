@@ -5,7 +5,15 @@ from .kan import KAN
 
 
 class seqKAN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, kan_params, device):
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, kan_params: dict, device: torch.device):
+        """
+        Proposed seqKAN architecture
+        :param input_size: Input feature size
+        :param hidden_size: Number of hidden states
+        :param output_size: Output size
+        :param kan_params: Parameters to initialize the KAN layers
+        :param device: CPU or GPU
+        """
         super(seqKAN, self).__init__()
 
         self.device = device
@@ -50,7 +58,15 @@ class seqKAN(nn.Module):
 
 
 class seqKAN_wide(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, kan_params, device):
+    def __init__(self, input_size: int, hidden_size: int, output_size: int, kan_params: dict, device: torch.device):
+        """
+        seqKAN/wide architecture
+        :param input_size: Input feature size
+        :param hidden_size: Number of hidden states
+        :param output_size: Output size
+        :param kan_params: Parameters to initialize the KAN layers
+        :param device: CPU or GPU
+        """
         super(seqKAN_wide, self).__init__()
 
         self.device = device
