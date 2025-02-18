@@ -26,6 +26,12 @@ jobs:
 
       - name: Add Poetry to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Automatically Bump Patch Version
+        run: |
+          poetry version patch 
+          NEW_VERSION=$(poetry version --short)
+          echo "New version: $NEW_VERSION"
         
       - name: Build package
         run: |
