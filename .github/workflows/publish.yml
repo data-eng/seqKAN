@@ -32,8 +32,8 @@ jobs:
           poetry version patch  # Increments the patch version
           NEW_VERSION=$(poetry version --short)
           echo "New version: $NEW_VERSION"
-      
           # Commit & push the updated version
+          git checkout main
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add pyproject.toml
