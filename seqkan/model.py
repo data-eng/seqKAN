@@ -76,12 +76,18 @@ class seqKAN_wide(nn.Module):
                             grid=kan_params['hidden']['grid'], grid_range=kan_params['hidden']['grid_range'],
                             k=kan_params['hidden']['k'],
                             seed=42,
+                            sp_trainable=False,
+                            affine_trainable=False,
+                            sb_trainable=False,
                             device=self.device)
 
         self.KANoutput = KAN(width=[hidden_size, output_size],
                              grid=kan_params['output']['grid'], grid_range=kan_params['output']['grid_range'],
                              k=kan_params['output']['k'],
                              seed=42,
+                             sp_trainable=False,
+                             affine_trainable=False,
+                             sb_trainable=False,
                              device=self.device)
 
     def forward(self, x):
