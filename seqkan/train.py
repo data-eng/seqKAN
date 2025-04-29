@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 
 
 def train(model,
-          train_dataset: torch.utils.data.Dataset,
-          val_dataset: torch.utils.data.Dataset,
+          train_dataset,
+          val_dataset,
           dir_path: str,
           train_params: dict,
           device: torch.device,
@@ -22,6 +22,8 @@ def train(model,
     :param use_reg: Train with regularization à la KAN
     :return:
     """
+
+    best_model = None
 
     batch_size = train_params['batch_size']
     epochs = train_params['epochs']
@@ -93,6 +95,7 @@ def train(model,
             best_val_loss = epoch_val_loss
             patience_counter = 0
             torch.save(model.state_dict(), f"{dir_path}/model.pth")
+            best_model = model
         else:
             patience_counter += 1
 
@@ -108,3 +111,5 @@ def train(model,
     plt.legend()
     plt.savefig(f"{dir_path}/losses.png", dpi=600)
     plt.close()
+
+    return best_model
