@@ -4,6 +4,8 @@ import numpy as np
 from .spline import *
 from .utils import sparse_mask
 
+import seqkan.utils
+
 
 class KANLayer(nn.Module):
     """
@@ -155,9 +157,10 @@ class KANLayer(nn.Module):
             
         #base = self.base_fun(x) # (batch, in_dim)
         y = coef2curve(x_eval=x, grid=self.grid, coef=self.coef, k=self.k)
-        
+        #seqkan.utils.plot_batch( x, self.grid, self.coef, self.k, "out/" )
+
         postspline = y.clone().permute(0,2,1)
-            
+
         #y = self.scale_base[None,:,:] * base[:,:,None] + self.scale_sp[None,:,:] * y
         y = self.mask[None,:,:] * y
         
