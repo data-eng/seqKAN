@@ -156,10 +156,8 @@ for epoch in range(epochs):
 
     trn_loss = 0.0
     mse = 0.0
-    nn = 0
     with torch.no_grad():
         for xx, yy in val_loader:
-            nn += 1
             xout = prc( xx.unsqueeze(dim=1) )
             trn_loss += criterion( xout.squeeze(), yy )
             mse += torch.mean( (xout.squeeze()-yy)**2 )
