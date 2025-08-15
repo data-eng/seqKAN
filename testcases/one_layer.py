@@ -41,7 +41,7 @@ prc = seqkan.kan.KANLayer( in_dim=1, out_dim=1,
 prc.double()
 
 batch_size = 16
-epochs = 20
+epochs = 5
 criterion = torch.nn.MSELoss()
 #optimizer = torch.optim.Adam( prc.parameters(), lr=0.05 )
 optimizer = torch.optim.SGD( prc.parameters(), lr=0.2 )
@@ -53,21 +53,6 @@ val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shu
 
 all_n = 128
 all_t, all_x, tru_y = dd.plotting_helper( all_n )
-
-
-if 1==0:
-    onego_coef = seqkan.kan.spline.curve2coef(
-        torch.Tensor(all_x).unsqueeze(dim=1),
-        torch.Tensor( tru_y.reshape(128,1,1) ),
-        prc.grid, kan_params["output"]["k"] )
-    onego_y = seqkan.kan.spline.coef2curve(
-        torch.Tensor(all_x).unsqueeze(dim=1),
-        prc.grid, onego_coef, kan_params["output"]["k"] )
-    onego_y = onego_y.squeeze().numpy()
-    plt.plot( all_x, tru_y )
-    plt.plot( all_x, onego_y )
-    plt.savefig( f"{outdir}/q_one_go" )
-    plt.close()
 
 old_coef = prc.coef.clone()
 training_time = 0
@@ -132,7 +117,7 @@ with torch.no_grad():
         start_time = time.time()
         yy = prc( x.unsqueeze(dim=1) )
         validation_time += (time.time() - start_time)
-        val_loss += criterion(yy[0].squeeze(), y)
+        val_loss += criterion(yy[0].squeeze(), y.squeeze())
 print( f"Training time: {training_time}" )
 print( f"Inf time/loss on training data: {val_loss}" )
 

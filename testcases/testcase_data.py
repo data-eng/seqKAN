@@ -41,11 +41,13 @@ class Periodic( torch.utils.data.Dataset ):
 
     def __getitem__( self, idx ):
         if self._seq:
-            return numpy.array( [self.x[idx]] ), self.y[idx]
+            inputs = numpy.array( [self.x[idx]] ).reshape(1,1)
+            outputs = numpy.array( [self.y[idx]] )
+            return inputs, outputs
         else:
             return self.x[idx], self.y[idx]
 
-    # If there is an underlying variable, proving to plotting
+    # If there is an underlying variable, provide to plotting
     # the underlying values that produce the observed inputs/outputs.
     # The learning algorithms must never access this.
     def plotting_helper( self, n=128 ):
@@ -56,7 +58,7 @@ class Periodic( torch.utils.data.Dataset ):
     # Estimate output scale
     @property
     def output_scale( self ):
-        return numpy.nanmedian( self.y )
+        return numpy.nanmax( self.y )
 
 
 
@@ -104,12 +106,13 @@ class Sequence( torch.utils.data.Dataset ):
 
     def __getitem__( self, idx ):
         if self._seq:
-            seq = numpy.array( [self.xin[idx]] )
-            return seq, self.xout[idx]
+            seq = numpy.array( [self.xin[idx]] ).reshape(1,1)
+            outputs = numpy.array( [self.xout[idx]] )
+            return seq, outputs
         else:
             return self.xin[idx], self.xout[idx]
 
-    # If there is an underlying variable, proving to plotting
+    # If there is an underlying variable, provide to plotting
     # the underlying values that produce the observed inputs/outputs.
     # The learning algorithms must never access this.
     def plotting_helper( self, n=128 ):
@@ -117,6 +120,74 @@ class Sequence( torch.utils.data.Dataset ):
         all_in = self.fun( all_t )
         all_out = self.fun( all_t + 1.0 )
         return all_t, all_in, all_out
+
+    # Estimate output scale
+    @property
+    def output_scale( self ):
+        return numpy.nanmedian( self.xout )
+
+
+
+class Detrending( torch.utils.data.Dataset ):
+
+    # Returns the timeseries value and the slope of the trend
+    # TODO: Estimate trend from data, eval against real trend
+    def fun( self, t ):
+        return numpy.sin(2*t) - 0.1*t**2, -0.2*t
+
+    '''
+    If seq == True, __getitem__ gives a length-one sequence [x]
+    else,  __getitem__ gives the value x
+    '''
+    def __init__( self, dsize, seq=True ):
+        self._seq = seq
+        self._left_t = 0.0
+        self._right_t = 9.0
+        self._dsize = dsize
+        # We need to stop at self._right_t-1.0 to have space for
+        # xout 0.5 and 1.0 times unit to the right 
+        self.t = numpy.linspace( self._left_t, self._right_t-1.0, self._dsize )
+        self.xin0, _ = self.fun( self.t )
+        self.xin1, self.slope = self.fun( self.t + 0.5 )
+        self.xout, _ = self.fun( self.t + 1.0 )
+        # Note that the network is trained on fun() values,
+        # not the underlying t variable
+        self._left = numpy.min( [numpy.min(self.xin0),
+                                 numpy.min(self.xin1),numpy.min(self.xout)] )
+        self._right = numpy.max( [numpy.max(self.xin0),
+                                  numpy.max(self.xin1),numpy.max(self.xout)] )
+
+    @property
+    def left( self ): return self._left
+
+    @property
+    def right( self ): return self._right
+
+    @property
+    def range( self ): return [self._left, self._right]
+
+    @property
+    def dsize( self ): return self._dsize
+
+    def __len__( self ): return self.dsize
+
+    def __getitem__( self, idx ):
+        if self._seq:
+            # shape: seq len x num variables
+            inputs = numpy.array( [self.xin0[idx],self.xin1[idx]] ).reshape(2,1)
+            outputs = numpy.array( [self.xout[idx],self.slope[idx]] )
+            return inputs, outputs
+        else:
+            return self.xin1[idx], self.xout[idx]
+
+    # If there is an underlying variable, provide to plotting
+    # the underlying values that produce the observed inputs/outputs.
+    # The learning algorithms must never access this.
+    def plotting_helper( self, n=128 ):
+        all_t = numpy.linspace( self._left_t, self._right_t-0.5, n )
+        all_in,all_slope = self.fun( all_t )
+        all_out,_ = self.fun( all_t + 0.5 )
+        return all_t, all_in, [all_out,all_slope]
 
     # Estimate output scale
     @property

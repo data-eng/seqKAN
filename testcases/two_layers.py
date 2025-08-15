@@ -49,7 +49,7 @@ all_t, all_xin, all_xout = dd.plotting_helper( all_n )
 ## Training Loop
 
 batch_size = 16
-epochs = 20
+epochs = 5
 criterion = torch.nn.MSELoss()
 #optimizer = torch.optim.Adam( prc.parameters(), lr=0.05 )
 optimizer = torch.optim.SGD( prc.parameters(), lr=0.2 )
@@ -74,7 +74,7 @@ for epoch in range(epochs):
     for x, y in trn_loader:
 
         xx = x.detach().numpy()
-        yy = y.detach().numpy()
+        yy = y.detach().squeeze().numpy()
 
         start_time = time.time()
         y_pred = prc( x.unsqueeze(dim=1) )
@@ -156,12 +156,10 @@ for epoch in range(epochs):
 
     trn_loss = 0.0
     mse = 0.0
-    nn = 0
     with torch.no_grad():
         for xx, yy in val_loader:
-            nn += 1
             xout = prc( xx.unsqueeze(dim=1) )
-            trn_loss += criterion( xout.squeeze(), yy )
+            trn_loss += criterion( xout.squeeze(), yy.squeeze() )
             mse += torch.mean( (xout.squeeze()-yy)**2 )
     print( f"Epoch {epoch}: loss {trn_loss} {mse}" )
     print( f"Training time, fwd pass {time_fwd:0.3f},  calc loss {time_loss:0.3f}, bp {time_bp:0.3f}, opt {time_opt:0.3f}, total: {training_time:0.3f}" )
