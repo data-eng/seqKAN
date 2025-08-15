@@ -17,8 +17,8 @@ outdir = "out/"
 os.makedirs(outdir, exist_ok=True)
 
 
-#dd = testcase_data.Periodic( -10, 10, 512 )
-dd = testcase_data.Sequence( 512, seq=False )
+#dd = testcase_data.Periodic( -10, 10, 512, seq=True )
+dd = testcase_data.Sequence( 512, seq=True )
 
 trn_dataset = torch.utils.data.Subset( dd, range(dd.dsize*1//8, dd.dsize) )
 val_dataset = torch.utils.data.Subset( dd, range(0, dd.dsize*1//8) )
@@ -59,7 +59,10 @@ val_loader = torch.utils.data.DataLoader(trn_dataset, batch_size=dd.dsize, shuff
 
 old_coef = prc.KANlayer.act_fun[0].coef.clone()
 training_time = 0
-validation_time = 0
+time_fwd = 0
+time_loss = 0
+time_bp = 0
+time_opt = 0
 
 old_coef0 = prc.KANlayer.act_fun[0].coef.clone()
 old_coef1 = prc.KANoutput.act_fun[0].coef.clone()
@@ -75,12 +78,20 @@ for epoch in range(epochs):
 
         start_time = time.time()
         y_pred = prc( x.unsqueeze(dim=1) )
+        time_fwd1 = time.time()
         loss = criterion(y_pred.squeeze(), y.squeeze())
-
+        time_loss1 = time.time()
         optimizer.zero_grad()
         loss.backward()
+        time_bp1 = time.time()
         optimizer.step()
+        time_opt1 = time.time()
+
         training_time += (time.time() - start_time)
+        time_fwd += (time_fwd1 - start_time)
+        time_loss += (time_loss1 - time_fwd1)
+        time_bp += (time_bp1 - time_loss1)
+        time_opt += (time_opt1 - time_bp1)
 
         fig, ax = plt.subplots( 2, 3 )
 
@@ -152,5 +163,6 @@ for epoch in range(epochs):
             xout = prc( xx.unsqueeze(dim=1) )
             trn_loss += criterion( xout.squeeze(), yy )
             mse += torch.mean( (xout.squeeze()-yy)**2 )
-    print( f"Epoch {epoch}: loss {trn_loss} {mse}, training time: {training_time}" )
+    print( f"Epoch {epoch}: loss {trn_loss} {mse}" )
+    print( f"Training time, fwd pass {time_fwd:0.3f},  calc loss {time_loss:0.3f}, bp {time_bp:0.3f}, opt {time_opt:0.3f}, total: {training_time:0.3f}" )
     # for epoch
